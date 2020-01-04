@@ -7,6 +7,18 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
+var bodyParser = require('body-parser');
+var session = require('express-session'); // 追加
+
+var routes = require('./routes/index');
+var users = require('./routes/users');
+var boards = require('./routes/boards');
+var register = require('./routes/register');
+var login = require('./routes/login');
+var logout = require('./routes/logout'); // 追加
+
+var setUser = require('./setUser'); // 追加
+
 var app = express();
 
 // view engine setup
@@ -18,9 +30,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true
+}));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/', setUser, routes); // 変更
+app.use('/users', users);
+app.use('/boards', setUser, boards); // 変更
+app.use('/register', register);
+app.use('/login', login);
+app.use('/logout', logout); // 追加
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
